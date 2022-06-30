@@ -33,7 +33,7 @@
 			      programs.zsh.enableSyntaxHighlighting = true;
 			      programs.zsh.autocd = true;
 			      programs.zsh.oh-my-zsh.enable = true;
-			      programs.zsh.oh-my-zsh.plugins = [git];
+			      programs.zsh.oh-my-zsh.plugins = ["git"];
 			      programs.zsh.oh-my-zsh.theme = "robbyrussell";
                           })	
 		      ];

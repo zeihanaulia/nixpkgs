@@ -23,11 +23,11 @@
                                   vim
                               ];
 			      
-			      // programming language
+			      # programming language
                               programs.go.enable = true;
 			      programs.go.package = pkgs.go_1_18;
 			      
-			      // tools
+			      # tools
 			      programs.zsh.enable = true;
 			      programs.zsh.enableAutosuggestions = true;
 			      programs.zsh.enableSyntaxHighlighting = true;

@@ -21,6 +21,7 @@
 
 			      home.packages = with pkgs;[
                                   vim
+				  dbeaver
                               ];
 			      
 			      # programming language

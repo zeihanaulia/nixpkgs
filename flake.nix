@@ -22,9 +22,17 @@
 			      home.packages = with pkgs;[
                                   vim
                               ];
-
+			      
+			      // programming language
                               programs.go.enable = true;
 			      programs.go.package = pkgs.go_1_18;
+			      
+			      // tools
+			      programs.zsh.enable = true;
+			      programs.zsh.enableAutosuggestions = true;
+			      programs.zsh.enableSyntaxHighlighting = true;
+			      programs.zsh.autocd = true;
+			      programs.zsh.oh-my-zsh.enable = true;
                           })	
 		      ];
                  };

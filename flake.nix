@@ -21,12 +21,14 @@
 
 			      home.packages = with pkgs;[
                                   vim
-				  dbeaver
+				  openapi-generator-cli
                               ];
 			      
 			      # programming language
                               programs.go.enable = true;
 			      programs.go.package = pkgs.go_1_18;
+			      
+			      # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 			      
 			      # tools
 			      programs.zsh.enable = true;

@@ -35,6 +35,8 @@
               # programming language
               programs.go.enable = true;
               programs.go.package = pkgs.go_1_18;
+							programs.go.goPath = "/home/zeihanaulia/go";
+							programs.go.goBin = "/home/zeihanaulia/go/bin/";
 
               # tools
               programs.zsh.enable = true;
@@ -55,6 +57,10 @@
                     "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
                 };
               }];
+
+							# home manager
+							programs.home-manager.enable = true;
+
             })
           ];
         };

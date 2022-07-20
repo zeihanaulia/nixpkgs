@@ -23,7 +23,7 @@
                 openapi-generator-cli
                 nixfmt
                 home-manager
-								zsh
+                zsh
               ];
 
               home.shellAliases = {
@@ -36,8 +36,8 @@
               # programming language
               programs.go.enable = true;
               programs.go.package = pkgs.go_1_18;
-							programs.go.goPath = "/home/zeihanaulia/go";
-							programs.go.goBin = "/home/zeihanaulia/go/bin/";
+              programs.go.goPath = "/home/zeihanaulia/go";
+              programs.go.goBin = "/home/zeihanaulia/go/bin/";
 
               # tools
               programs.zsh.enable = true;
@@ -59,8 +59,8 @@
                 };
               }];
 
-							# home manager
-							programs.home-manager.enable = true;
+              # home manager
+              programs.home-manager.enable = true;
 
             })
           ];

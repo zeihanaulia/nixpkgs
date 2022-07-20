@@ -23,6 +23,7 @@
                 openapi-generator-cli
                 nixfmt
                 home-manager
+								zsh
               ];
 
               home.shellAliases = {

@@ -24,6 +24,7 @@
                 nixfmt
                 home-manager
                 zsh
+                yarn
               ];
 
               home.shellAliases = {

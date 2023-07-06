@@ -25,6 +25,9 @@
                 home-manager
                 zsh
                 yarn
+                nodejs
+                mob
+                xclip
               ];
 
               home.shellAliases = {
@@ -36,7 +39,7 @@
 
               # programming language
               programs.go.enable = true;
-              programs.go.package = pkgs.go_1_18;
+              programs.go.package = pkgs.go_1_20;
               programs.go.goPath = "/home/zeihanaulia/go";
               programs.go.goBin = "/home/zeihanaulia/go/bin/";
 

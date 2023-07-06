@@ -1,13 +1,16 @@
 {
   inputs = {
     home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = { self, home-manager, nixpkgs, ... }@inputs:
+  outputs = { self, home-manager, nixpkgs, nixpkgs-unstable, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
     in {
       homeConfigurations = {
         zeihanaulia = home-manager.lib.homeManagerConfiguration {
@@ -28,6 +31,7 @@
                 nodejs
                 mob
                 xclip
+                pkgs-unstable.gopls
               ];
 
               home.shellAliases = {
@@ -39,7 +43,7 @@
 
               # programming language
               programs.go.enable = true;
-              programs.go.package = pkgs.go_1_20;
+              programs.go.package = pkgs-unstable.go;
               programs.go.goPath = "/home/zeihanaulia/go";
               programs.go.goBin = "/home/zeihanaulia/go/bin/";
 

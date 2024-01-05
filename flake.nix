@@ -11,7 +11,11 @@
   utils.lib.eachDefaultSystem (system: 
   let 
     pkgs-unstable = import nixpkgs-unstable { inherit system; };
-    overlays = [ (final: prev: { go = pkgs-unstable.go; }) ]; 
+    overlays = [ (final: prev: { 
+      go = pkgs-unstable.go; 
+      rustc = pkgs-unstable.rustc; 
+      cargo = pkgs-unstable.cargo; 
+    }) ]; 
     pkgs = import nixpkgs { inherit overlays system; };
   in
   {
@@ -40,6 +44,8 @@
                   mob
                   xclip
                   gopls
+                  rustc
+                  cargo
                 ] ++ lib.optionals pkgs.stdenv.isLinux [
                   # Add packages only for Linux
                 ] ++ lib.optionals pkgs.stdenv.isDarwin [
@@ -56,11 +62,16 @@
                     "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfigurations.${system}.${username}";
                 };
 
+
                 # programming language`
                 programs.go.enable = true;
                 programs.go.package = pkgs.go;
                 programs.go.goPath = "${homeDirectory}/go";
                 programs.go.goBin = "${homeDirectory}/go/bin/";
+
+                home.sessionVariables = {
+                  RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+                };
 
                 # tools
                 programs.zsh.enable = true;

@@ -12,9 +12,13 @@
   let 
     pkgs-unstable = import nixpkgs-unstable { inherit system; };
     overlays = [ (final: prev: { 
-      go = pkgs-unstable.go; 
-      rustc = pkgs-unstable.rustc; 
-      cargo = pkgs-unstable.cargo; 
+      go = pkgs-unstable.go;
+      rustup = pkgs-unstable.rustup;
+      clang = pkgs-unstable.clang;
+      protobuf = pkgs-unstable.protobuf;
+      llvm = pkgs-unstable.llvm;
+      nodejs = pkgs-unstable.nodejs;
+      yarn = pkgs-unstable.yarn;
     }) ]; 
     pkgs = import nixpkgs { inherit overlays system; };
   in
@@ -44,8 +48,11 @@
                   mob
                   xclip
                   gopls
-                  rustc
-                  cargo
+                  rustup
+                  clang
+                  protobuf
+                  llvm
+                  gnumake
                 ] ++ lib.optionals pkgs.stdenv.isLinux [
                   # Add packages only for Linux
                 ] ++ lib.optionals pkgs.stdenv.isDarwin [
@@ -69,8 +76,11 @@
                 programs.go.goPath = "${homeDirectory}/go";
                 programs.go.goBin = "${homeDirectory}/go/bin/";
 
+                # rust
+                # RUSTC_VERSION = pkgs.lib.readFile ./rust-toolchain;
                 home.sessionVariables = {
                   RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+                  LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
                 };
 
                 # tools

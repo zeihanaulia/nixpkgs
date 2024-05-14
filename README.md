@@ -44,3 +44,6 @@ nix build ~/.config/nixpkgs/#homeConfigurations.aarch64-darwin.zeihanaulia.activ
 nxa 
 ```
 
+## Reference
+
+- [Nix Search](https://search.nixos.org/packages?channel=23.11&from=0&size=50&sort=relevance&type=packages&query=pip)

@@ -53,6 +53,8 @@
                   protobuf
                   llvm
                   gnumake
+                  python3
+                  python311Packages.pip
                 ] ++ lib.optionals pkgs.stdenv.isLinux [
                   # Add packages only for Linux
                 ] ++ lib.optionals pkgs.stdenv.isDarwin [

@@ -72,17 +72,34 @@
                   '';
                 };
 
-                # Define shell aliases for convenience commands related to Nix
-                home.shellAliases = {
-                  flakeup = ''
-                    nix flake lock ${nixConfigDirectory} --update-input $1   # Update specified input in flake lock file
-                  '';
-                  nxb = ''
-                    nix build ${nixConfigDirectory}/#homeConfigurations.${username}.activationPackage -o ${nixConfigDirectory}/result   # Build the activation package
-                  '';
-                  nxa = ''
-                    ${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfigurations.${username}   # Activate the configuration
-                  '';
+                # Write aliases directly into .zshrc
+                home.file.".zshrc".text = ''
+                  alias flakeup='nix flake lock ${nixConfigDirectory} --update-input $1'
+                  alias nxb='nix build ${nixConfigDirectory}/#homeConfiguration.${username}.activationPackage -o ${nixConfigDirectory}/result'
+                  alias nxa='${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}'
+                '';
+
+                # Zsh Configuration
+                programs.zsh = {
+                  enable = true;  # Enable Zsh as the shell
+                  autosuggestion.enable = true;  # Enable command autosuggestion in Zsh
+                  syntaxHighlighting.enable = true;  # Enable syntax highlighting in Zsh
+                  autocd = true;  # Enable autocd (change directory automatically)
+                  oh-my-zsh = {
+                    enable = true;  # Enable Oh My Zsh framework
+                    plugins = [ "git" ];  # Use the Git plugin with Oh My Zsh
+                    theme = "robbyrussell";  # Set the theme to robbyrussell
+                  };
+                  plugins = [{
+                    name = "zsh-nix-shell";  # Plugin for integrating Nix with Zsh
+                    file = "nix-shell.plugin.zsh";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "chisui";
+                      repo = "zsh-nix-shell";
+                      rev = "v0.5.0";
+                      sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
+                    };
+                  }];
                 };
 
                 # Enable Home Manager programs for the user

@@ -34,7 +34,7 @@
             modules = [
               {
                 # Set the state version of Home Manager (aligns with the version of Nixpkgs)
-                home.stateVersion = "23.05";
+                home.stateVersion = "24.05";
 
                 # Set the username for the Home Manager configuration
                 home.username = username;
@@ -54,16 +54,6 @@
                   python311Packages.pip # Python pip package manager
                   rustup          # Rustup installer from Nixpkgs
                 ];
-
-                # Set up environment variables necessary for Rust development, Go binary path, and cargo path
-                home.sessionVariables = {
-                  RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
-                  CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
-                  GOPATH = "$HOME/go";             # Set GOPATH environment variable
-                  CARGOBIN = "$HOME/.cargo/bin";   # Define CARGO_BIN separately
-                  GOBIN = "$HOME/go/bin";          # Define GOBIN separately
-                  PATH = "$CARGOBIN:$GOBIN:$PATH"; # Include both CARGOBIN and GOBIN in PATH
-                };
 
                 # Define an activation script to configure Rustup
                 home.activation = {
@@ -104,6 +94,16 @@
                       sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
                     };
                   }];
+
+                  # Correctly set environment variables for Go and Rust
+                  sessionVariables = {
+                    RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
+                    CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
+                    GOPATH = "$HOME/go";             # Set GOPATH environment variable to the correct path
+                    CARGOBIN = "$CARGO_HOME/bin";    # Define CARGOBIN based on CARGO_HOME
+                    GOBIN = "$GOPATH/bin";           # Define GOBIN based on GOPATH
+                    PATH = "$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH";  # Update PATH
+                  };
                 };
 
                 # Enable Home Manager programs for the user

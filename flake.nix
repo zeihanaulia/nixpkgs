@@ -77,7 +77,7 @@
                 };
 
                 # Define Zsh aliases using zsh.shellAliases
-                programs.zsh.shellAliases = {
+                home.shellAliases = {
                   flakeup = "nix flake lock ${nixConfigDirectory} --update-input $1";
                   nxb = "nix build ${nixConfigDirectory}/#homeConfiguration.${username}.activationPackage -o ${nixConfigDirectory}/result";
                   nxa = "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}";

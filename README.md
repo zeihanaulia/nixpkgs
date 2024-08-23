@@ -94,6 +94,14 @@ For convenience, you can use the predefined shell aliases to manage your Nix con
 
 These aliases simplify the process of managing and updating your Nix environment.
 
+## Upgrade
+
+- **Upgrade Nix**
+
+```sh
+nix upgrade-nix --nix-store-paths-url https://releases.nixos.org/nix/nix-2.23.3/fallback-paths.nix
+```
+
 ## Reference
 
 - [Nix Search](https://search.nixos.org/packages?channel=23.11&from=0&size=50&sort=relevance&type=packages&query=pip): A search tool to find available Nix packages and channels.

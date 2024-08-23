@@ -54,11 +54,14 @@
                   rustup          # Rustup installer from Nixpkgs
                 ];
 
-                # Set up environment variables necessary for Rust development
+                # Set up environment variables necessary for Rust development, Go binary path, and cargo path
                 home.sessionVariables = {
                   RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
                   CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
-                  PATH = "$HOME/.cargo/bin:$PATH"; # Add Cargo binaries to PATH
+                  GOPATH = "$HOME/go";             # Set GOPATH environment variable
+                  CARGOBIN = "$HOME/.cargo/bin";   # Define CARGO_BIN separately
+                  GOBIN = "$HOME/go/bin";          # Define GOBIN separately
+                  PATH = "$CARGOBIN:$GOBIN:$PATH"; # Include both CARGOBIN and GOBIN in PATH
                 };
 
                 # Define an activation script to configure Rustup
@@ -77,6 +80,7 @@
                   alias flakeup='nix flake lock ${nixConfigDirectory} --update-input $1'
                   alias nxb='nix build ${nixConfigDirectory}/#homeConfiguration.${username}.activationPackage -o ${nixConfigDirectory}/result'
                   alias nxa='${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}'
+                  export PATH="$HOME/go/bin:$PATH"                
                 '';
 
                 # Zsh Configuration

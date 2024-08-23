@@ -69,9 +69,9 @@
                 home.activation = {
                   configureRustup = ''
                     if [ -x "$HOME/.cargo/bin/rustup" ]; then
-                      export PATH="$HOME/.cargo/bin:$PATH"    # Ensure Cargo binaries are in PATH
-                      "$HOME/.cargo/bin/rustup" toolchain install stable   # Install stable Rust toolchain
-                      "$HOME/.cargo/bin/rustup" default stable             # Set stable as default toolchain
+                      export PATH="$HOME/.cargo/bin:$PATH"    
+                      "$HOME/.cargo/bin/rustup" toolchain install stable   
+                      "$HOME/.cargo/bin/rustup" default stable            
                     fi
                   '';
                 };

@@ -53,6 +53,7 @@
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager
                   rustup          # Rustup installer from Nixpkgs
+                  tmux            # Include tmux terminal multiplexer
                 ];
 
                 # Set up environment variables necessary for Rust development, Go binary path, and cargo path
@@ -104,6 +105,25 @@
                       sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
                     };
                   }];
+                };
+
+                # Tmux Configuration
+                programs.tmux = {
+                  enable = true;  # Enable tmux
+                  mouse = true;   # Enable mouse support
+                  historyLimit = 10000;  # Increase scrollback buffer size
+                  prefix = "C-a";  # Set the prefix key to Ctrl-a
+                  extraConfig = ''
+                    set -g default-terminal "screen-256color"
+                    set -g prefix C-a 
+                    unbind C-b
+                    bind-key C-a send-prefix
+                  '';
+                  plugins = [ 
+                    pkgs.tmuxPlugins.nord 
+                    pkgs.tmuxPlugins.sensible 
+                    pkgs.tmuxPlugins.resurrect 
+                  ];
                 };
 
                 # Enable Home Manager programs for the user

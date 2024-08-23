@@ -1,49 +1,99 @@
 # Nix Setup
 
+This document provides instructions on how to set up and manage your Nix environment using Home Manager with a specific configuration.
+
 ## How to Install
 
 ### Nix
 
-```
-sh <(curl -L https://nixos.org/nix/install) --daemon
-```
+To install Nix in multi-user mode (recommended for most users), run the following command:
 
-### Build
-
-```
-nix build github:zeihanaulia/nixpkgs#homeConfigurations.x86_64-linux.zeihanaulia.activationPackage
+```sh
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-### Update lock for specific inputs
+This script will download and install Nix with the necessary configurations.
 
+## Build and Activate Configuration
+
+To build and activate the Home Manager configuration for the user, use the following commands based on your system:
+
+### For Linux
+
+1. **Build the configuration:**
+
+   ```sh
+   nix build ~/.config/nixpkgs/#homeConfiguration.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+   ```
+
+2. **Activate the configuration:**
+
+   ```sh
+   ~/.config/nixpkgs/result/activate switch --flake ~/.config/nixpkgs/#homeConfiguration.zeihanaulia
+   ```
+
+### For macOS (Intel)
+
+1. **Build the configuration:**
+
+   ```sh
+   nix build ~/.config/nixpkgs/#homeConfiguration.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+   ```
+
+2. **Activate the configuration:**
+
+   ```sh
+   ~/.config/nixpkgs/result/activate switch --flake ~/.config/nixpkgs/#homeConfiguration.zeihanaulia
+   ```
+
+### For macOS (M1)
+
+1. **Build the configuration:**
+
+   ```sh
+   nix build ~/.config/nixpkgs/#homeConfiguration.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+   ```
+
+2. **Activate the configuration:**
+
+   ```sh
+   ~/.config/nixpkgs/result/activate switch --flake ~/.config/nixpkgs/#homeConfiguration.zeihanaulia
+   ```
+
+## Updating Flake Inputs
+
+To update the lock file for specific inputs in your flake, use the `flake lock` command. For example, to update `nixpkgs-unstable`:
+
+```sh
+nix flake lock ~/.config/nixpkgs --update-input nixpkgs-unstable
 ```
-# example
-flake nixpkgs-unstable
-```
 
-### nix build
+This command updates the input for `nixpkgs-unstable` within your flake configuration.
 
-```bash
-# ${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfigurations.${system}.${username}
-# first using nix build 
-// https://github.com/numtide/flake-utils/blob/main/allSystems.nix
+## Using Shell Aliases
 
-# for linux
-## Build
-nix build ~/.config/nixpkgs/#homeConfigurations.x86_64-linux.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result 
-## Activated
-~/.config/nixpkgs/result/activate switch --flake ~/.config/nixpkgs/#homeConfigurations.x86_64-linux.zeihanaulia
+For convenience, you can use the predefined shell aliases to manage your Nix configurations:
 
-## for darwin (macos intel)
-nix build ~/.config/nixpkgs/#homeConfigurations.x86_64-darwin.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+- **Update a specific flake input:**
 
-## for darwin (macos M1)
-nix build ~/.config/nixpkgs/#homeConfigurations.aarch64-darwin.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+  ```sh
+  flakeup nixpkgs-unstable
+  ```
 
-## Then you can use alias 
-nxa 
-```
+- **Build the activation package:**
+
+  ```sh
+  nxb
+  ```
+
+- **Activate the configuration:**
+
+  ```sh
+  nxa
+  ```
+
+These aliases simplify the process of managing and updating your Nix environment.
 
 ## Reference
 
-- [Nix Search](https://search.nixos.org/packages?channel=23.11&from=0&size=50&sort=relevance&type=packages&query=pip)
+- [Nix Search](https://search.nixos.org/packages?channel=23.11&from=0&size=50&sort=relevance&type=packages&query=pip): A search tool to find available Nix packages and channels.

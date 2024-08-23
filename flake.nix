@@ -1,118 +1,97 @@
 {
   inputs = {
+    # Define the URL for the Home Manager and Nixpkgs inputs
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs";
   };
 
-  outputs = { self, home-manager, nixpkgs, nixpkgs-unstable, utils, ... }@inputs:
-  utils.lib.eachDefaultSystem (system: 
-  let 
-    pkgs-unstable = import nixpkgs-unstable { inherit system; };
-    overlays = [ (final: prev: { 
-      go = pkgs-unstable.go;
-      rustup = pkgs-unstable.rustup;
-      clang = pkgs-unstable.clang;
-      protobuf = pkgs-unstable.protobuf;
-      llvm = pkgs-unstable.llvm;
-      nodejs = pkgs-unstable.nodejs;
-      yarn = pkgs-unstable.yarn;
-    }) ]; 
-    pkgs = import nixpkgs { inherit overlays system; };
-  in
-  {
-    homeConfigurations = {
-      zeihanaulia = home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [
-              ({ pkgs, ... }: 
-                let 
-                  nixConfigDirectory = "~/.config/nixpkgs"; 
-                  username = "zeihanaulia";
-                  homeDirectory = "/${if pkgs.stdenv.isDarwin then "Users" else "home"}/${username}";
-                in {
-                home.stateVersion = "22.05";
-                home.username = username;
-                home.homeDirectory = homeDirectory;
+  outputs = { self, home-manager, nixpkgs }:
+    let
+      # Define the list of systems for which the outputs should be provided
+      allSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" "aarch64-apple-darwin" ];
 
+      # Define the username variable for use in Home Manager configurations
+      username = "zeihanaulia";  
+
+      # Define the Nix configuration directory variable, pointing to the user's Nix configuration path
+      nixConfigDirectory = "~/.config/nixpkgs"; 
+      
+      # Function to generate system-specific Nixpkgs for each system listed in allSystems
+      forAllSystems = f: nixpkgs.lib.genAttrs allSystems (system: f {
+        # Import Nixpkgs for the given system architecture
+        pkgs = import nixpkgs { inherit system; };
+      });
+
+    in {
+      # Generate packages for each system configuration using the defined function
+      packages = forAllSystems ({ pkgs }: {
+        # Define the Home Manager configuration for the user 'zeihanaulia'
+        homeConfiguration = {
+          zeihanaulia = home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;  # Inherit the pkgs from the imported Nixpkgs
+
+            modules = [
+              {
+                # Set the state version of Home Manager (aligns with the version of Nixpkgs)
+                home.stateVersion = "23.05";
+
+                # Set the username for the Home Manager configuration
+                home.username = username;
+
+                # Conditionally set the home directory based on the operating system
+                # Use '/Users/${username}' for macOS (Darwin) and '/home/${username}' for Linux
+                home.homeDirectory = if pkgs.stdenv.isDarwin
+                then "/Users/${username}"
+                else "/home/${username}";
+
+                # Define the packages to be installed, including specific versions of Go, Node.js, Rustup, and Python
                 home.packages = with pkgs; [
-                  vim
-                  openapi-generator-cli
-                  nixfmt
-                  home-manager
-                  zsh
-                  yarn
-                  nodejs
-                  mob
-                  xclip
-                  gopls
-                  rustup
-                  clang
-                  protobuf
-                  llvm
-                  gnumake
-                  python3
-                  python311Packages.pip
-                ] ++ lib.optionals pkgs.stdenv.isLinux [
-                  # Add packages only for Linux
-                ] ++ lib.optionals pkgs.stdenv.isDarwin [
-                  # Add packages only for Darwin (MacOS)
+                  (pkgs.go_1_23)  # Specify Go version 1.23 explicitly
+                  gopls           # Go language server protocol package
+                  nodejs          # Latest Node.js package available in Nixpkgs
+                  python3         # Latest Python 3 package available in Nixpkgs
+                  rustup          # Rustup installer from Nixpkgs
                 ];
 
-                home.shellAliases = {
-                  flakeup = 
-                    # example flakeup nixpkgs-unstable
-                    "nix flake lock ${nixConfigDirectory} --update-input"; 
-                  nxb =
-                    "nix build ${nixConfigDirectory}/#homeConfigurations.${system}.${username}.activationPackage -o ${nixConfigDirectory}/result ";
-                  nxa =
-                    "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfigurations.${system}.${username}";
-                };
-
-
-                # programming language`
-                programs.go.enable = true;
-                programs.go.package = pkgs.go;
-                programs.go.goPath = "${homeDirectory}/go";
-                programs.go.goBin = "${homeDirectory}/go/bin/";
-
-                # rust
-                # RUSTC_VERSION = pkgs.lib.readFile ./rust-toolchain;
+                # Set up environment variables necessary for Rust development
                 home.sessionVariables = {
-                  RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
-                  LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
+                  RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
+                  CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
+                  PATH = "$HOME/.cargo/bin:$PATH"; # Add Cargo binaries to PATH
                 };
 
-                # tools
-                programs.zsh.enable = true;
-                programs.zsh.enableAutosuggestions = true;
-                programs.zsh.enableSyntaxHighlighting = true;
-                programs.zsh.autocd = true;
-                programs.zsh.oh-my-zsh.enable = true;
-                programs.zsh.oh-my-zsh.plugins = [ "git" ];
-                programs.zsh.oh-my-zsh.theme = "robbyrussell";
-                programs.zsh.plugins = [{
-                  name = "zsh-nix-shell";
-                  file = "nix-shell.plugin.zsh";
-                  src = pkgs.fetchFromGitHub {
-                    owner = "chisui";
-                    repo = "zsh-nix-shell";
-                    rev = "v0.5.0";
-                    sha256 =
-                      "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
-                  };
-                }];
+                # Define an activation script to configure Rustup
+                home.activation = {
+                  configureRustup = ''
+                    if [ -x "$HOME/.cargo/bin/rustup" ]; then
+                      export PATH="$HOME/.cargo/bin:$PATH"    # Ensure Cargo binaries are in PATH
+                      "$HOME/.cargo/bin/rustup" toolchain install stable   # Install stable Rust toolchain
+                      "$HOME/.cargo/bin/rustup" default stable             # Set stable as default toolchain
+                    fi
+                  '';
+                };
 
-                # home manager
+                # Define shell aliases for convenience commands related to Nix
+                home.shellAliases = {
+                  flakeup = ''
+                    nix flake lock ${nixConfigDirectory} --update-input $1   # Update specified input in flake lock file
+                  '';
+                  nxb = ''
+                    nix build ${nixConfigDirectory}/#homeConfigurations.${username}.activationPackage -o ${nixConfigDirectory}/result   # Build the activation package
+                  '';
+                  nxa = ''
+                    ${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfigurations.${username}   # Activate the configuration
+                  '';
+                };
+
+                # Enable Home Manager programs for the user
                 programs.home-manager.enable = true;
-
-              })
+              }
             ];
-          };
-    }; 
-  
-  });
 
+          };
+        };
+      });
+    };
 }

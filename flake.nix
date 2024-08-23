@@ -76,13 +76,12 @@
                   '';
                 };
 
-                # Write aliases directly into .zshrc
-                home.file.".zshrc".text = ''
-                  alias flakeup='nix flake lock ${nixConfigDirectory} --update-input $1'
-                  alias nxb='nix build ${nixConfigDirectory}/#homeConfiguration.${username}.activationPackage -o ${nixConfigDirectory}/result'
-                  alias nxa='${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}'
-                  export PATH="$HOME/go/bin:$PATH"                
-                '';
+                # Define Zsh aliases using zsh.shellAliases
+                programs.zsh.shellAliases = {
+                  flakeup = "nix flake lock ${nixConfigDirectory} --update-input $1";
+                  nxb = "nix build ${nixConfigDirectory}/#homeConfigurations.${username}.activationPackage -o ${nixConfigDirectory}/result";
+                  nxa = "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfigurations.${username}";
+                };
 
                 # Zsh Configuration
                 programs.zsh = {

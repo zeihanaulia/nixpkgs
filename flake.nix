@@ -50,6 +50,7 @@
                   (pkgs.go_1_23)  # Specify Go version 1.23 explicitly
                   gopls           # Go language server protocol package
                   nodejs          # Latest Node.js package available in Nixpkgs
+                  yarn            # Latest yarn package available in Nixpkgs
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager
                   rustup          # Rustup installer from Nixpkgs

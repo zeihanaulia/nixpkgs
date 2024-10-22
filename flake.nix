@@ -49,6 +49,10 @@
                 home.packages = with pkgs; [
                   (pkgs.go_1_23)  # Specify Go version 1.23 explicitly
                   gopls           # Go language server protocol package
+                  gotests
+                  gomodifytags
+                  impl
+                  delve
                   nodejs          # Latest Node.js package available in Nixpkgs
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager

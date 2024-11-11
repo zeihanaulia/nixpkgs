@@ -23,7 +23,7 @@ To build and activate the Home Manager configuration for the user, use the follo
 1. **Build the configuration:**
 
    ```sh
-   nix build ~/.config/nixpkgs/#homeConfiguration.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+   nix build ~/.config/nixpkgs/#home-zeihanaulia -o ~/.config/nixpkgs/result
    ```
 
 2. **Activate the configuration:**
@@ -37,7 +37,7 @@ To build and activate the Home Manager configuration for the user, use the follo
 1. **Build the configuration:**
 
    ```sh
-   nix build ~/.config/nixpkgs/#homeConfiguration.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+   nix build ~/.config/nixpkgs/#home-zeihanaulia -o ~/.config/nixpkgs/result
    ```
 
 2. **Activate the configuration:**
@@ -51,7 +51,7 @@ To build and activate the Home Manager configuration for the user, use the follo
 1. **Build the configuration:**
 
    ```sh
-   nix build ~/.config/nixpkgs/#homeConfiguration.zeihanaulia.activationPackage -o ~/.config/nixpkgs/result
+   nix build ~/.config/nixpkgs/#home-zeihanaulia -o ~/.config/nixpkgs/result
    ```
 
 2. **Activate the configuration:**

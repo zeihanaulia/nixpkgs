@@ -53,6 +53,9 @@
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager
                   rustup          # Rustup installer from Nixpkgs
+
+                  # Tambahkan ollama disini jika tersedia dalam Nixpkgs
+                  ollama  
                 ];
 
                 # Define an activation script to configure Rustup
@@ -64,6 +67,13 @@
                       "$HOME/.cargo/bin/rustup" default stable            
                     fi
                   '';
+
+                  configureOllama = ''
+                    if [ -x "$HOME/.local/bin/ollama" ]; then
+                      ollama pull qwen/qwen-2.5-14b
+                    fi
+                  '';
+                  
                 };
 
                 # Define Zsh aliases using zsh.shellAliases

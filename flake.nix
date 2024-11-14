@@ -53,6 +53,7 @@
                   gomodifytags
                   impl
                   delve
+                  mysql-client
                   nodejs          # Latest Node.js package available in Nixpkgs
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager
@@ -77,6 +78,16 @@
                   nxa = "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}";
                 };
 
+                # Correctly set environment variables for Go and Rust
+                home.sessionVariables = {
+                  RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
+                  CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
+                  GOPATH = "$HOME/go";             # Set GOPATH environment variable to the correct path
+                  GOBIN = "$HOME/go/bin";             # Set GOPATH environment variable to the correct path
+                  CARGOBIN = "$CARGO_HOME/bin";    # Define CARGOBIN based on CARGO_HOME
+                  PATH = "$CARGOBIN:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";  # Update PATH
+                };
+
                 # Zsh Configuration
                 programs.zsh = {
                   enable = true;  # Enable Zsh as the shell
@@ -98,16 +109,6 @@
                       sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
                     };
                   }];
-
-                  # Correctly set environment variables for Go and Rust
-                  sessionVariables = {
-                    RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
-                    CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
-                    GOPATH = "$HOME/go";             # Set GOPATH environment variable to the correct path
-                    CARGOBIN = "$CARGO_HOME/bin";    # Define CARGOBIN based on CARGO_HOME
-                    GOBIN = "$GOPATH/bin";           # Define GOBIN based on GOPATH
-                    PATH = "$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH";  # Update PATH
-                  };
                 };
 
                 # Enable Home Manager programs for the user

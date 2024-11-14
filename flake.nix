@@ -58,6 +58,8 @@
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager
                   rustup          # Rustup installer from Nixpkgs
+                  gcc
+                  glibc
                 ];
 
                 # Define an activation script to configure Rustup

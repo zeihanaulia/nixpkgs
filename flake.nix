@@ -60,6 +60,7 @@
                   rustup          # Rustup installer from Nixpkgs
                   gcc
                   glibc
+                  neovim
                 ];
 
                 # Define an activation script to configure Rustup
@@ -87,7 +88,8 @@
                   GOPATH = "$HOME/go";             # Set GOPATH environment variable to the correct path
                   GOBIN = "$HOME/go/bin";             # Set GOPATH environment variable to the correct path
                   CARGOBIN = "$CARGO_HOME/bin";    # Define CARGOBIN based on CARGO_HOME
-                  PATH = "$CARGOBIN:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";  # Update PATH
+                  # PATH = "$CARGOBIN:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";  # Update PATH
+                  PATH = "${pkgs.nodejs}/bin:$HOME/.npm-global/bin:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";
                 };
 
                 # Zsh Configuration
@@ -96,11 +98,13 @@
                   autosuggestion.enable = true;  # Enable command autosuggestion in Zsh
                   syntaxHighlighting.enable = true;  # Enable syntax highlighting in Zsh
                   autocd = true;  # Enable autocd (change directory automatically)
+                  
                   oh-my-zsh = {
                     enable = true;  # Enable Oh My Zsh framework
                     plugins = [ "git" ];  # Use the Git plugin with Oh My Zsh
                     theme = "robbyrussell";  # Set the theme to robbyrussell
                   };
+                  
                   plugins = [{
                     name = "zsh-nix-shell";  # Plugin for integrating Nix with Zsh
                     file = "nix-shell.plugin.zsh";
@@ -111,6 +115,12 @@
                       sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
                     };
                   }];
+
+                initExtra = ''
+                  if [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+                    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+                  fi
+                '';
                 };
 
                 # Enable Home Manager programs for the user

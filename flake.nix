@@ -1,69 +1,77 @@
 {
   inputs = {
-    # Define the URL for the Home Manager and Nixpkgs inputs
+    # Specify the source for the Home Manager configuration
+    # This fetches Home Manager from its GitHub repository
     home-manager.url = "github:nix-community/home-manager";
+    # Make Home Manager follow the same Nixpkgs version
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    # Specify the source for Nixpkgs, the main package collection
     nixpkgs.url = "github:nixos/nixpkgs";
   };
 
   outputs = { self, home-manager, nixpkgs }:
     let
-      # Define the list of systems for which the outputs should be provided
+      # Define the list of supported systems and architectures
+      # This ensures configuration is generated for each specified system
       allSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" "aarch64-apple-darwin" ];
 
-      # Define the username variable for use in Home Manager configurations
-      username = "zeihanaulia";  
+      # Specify the username for Home Manager configurations
+      # Used for setting up the home directory and other user-specific settings
+      username = "zeihanaulia";
 
-      # Define the Nix configuration directory variable, pointing to the user's Nix configuration path
+      # Specify the Nix configuration directory for the user
+      # Points to the path where Home Manager configuration files are stored
       nixConfigDirectory = "~/.config/nixpkgs"; 
       
-      # Function to generate system-specific Nixpkgs for each system listed in allSystems
+      # Function to generate Nixpkgs configurations for each system in `allSystems`
+      # `genAttrs` creates a set of attributes based on the provided list of systems
       forAllSystems = f: nixpkgs.lib.genAttrs allSystems (system: f {
         # Import Nixpkgs for the given system architecture
         pkgs = import nixpkgs { inherit system; };
       });
 
     in {
-      # Generate packages for each system configuration using the defined function
+      # Generate packages for each system configuration
       packages = forAllSystems ({ pkgs }: {
-        # Define the Home Manager configuration for the user 'zeihanaulia'
+        # Define the Home Manager configuration for the user
         homeConfiguration = {
           zeihanaulia = home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;  # Inherit the pkgs from the imported Nixpkgs
+            inherit pkgs;  # Import `pkgs` from the Nixpkgs configurations
 
             modules = [
               {
-                # Set the state version of Home Manager (aligns with the version of Nixpkgs)
+                # Specify the Home Manager state version
+                # This version must align with the Nixpkgs version used
                 home.stateVersion = "24.05";
 
-                # Set the username for the Home Manager configuration
+                # Define the username for Home Manager
                 home.username = username;
 
-                # Conditionally set the home directory based on the operating system
-                # Use '/Users/${username}' for macOS (Darwin) and '/home/${username}' for Linux
+                # Set the home directory conditionally based on the operating system
+                # For macOS, use `/Users/username`
+                # For Linux, use `/home/username`
                 home.homeDirectory = if pkgs.stdenv.isDarwin
                 then "/Users/${username}"
                 else "/home/${username}";
 
-                # Define the packages to be installed, including specific versions of Go, Node.js, Rustup, and Python
+                # Specify the list of packages to be installed
                 home.packages = with pkgs; [
-                  (pkgs.go_1_23)  # Specify Go version 1.23 explicitly
-                  gopls           # Go language server protocol package
-                  gotests
-                  gomodifytags
-                  impl
-                  delve
-                  mysql-client
-                  nodejs          # Latest Node.js package available in Nixpkgs
-                  python3         # Latest Python 3 package available in Nixpkgs
-                  python311Packages.pip # Python pip package manager
-                  rustup          # Rustup installer from Nixpkgs
-                  gcc
-                  glibc
-                  neovim
+                  (pkgs.go_1_23)  # Install Go version 1.23
+                  gopls           # Language server for Go
+                  gotests         # Tool for managing tests in Go
+                  gomodifytags    # Tool for modifying struct tags in Go
+                  impl            # Tool to generate method stubs in Go
+                  delve           # Debugger for Go
+                  mysql-client    # MySQL client tools
+                  nodejs          # Latest Node.js version
+                  python3         # Latest Python 3 version
+                  python311Packages.pip # Python package manager (pip)
+                  rustup          # Rustup installer for managing Rust versions
+                  gcc             # GCC compiler
+                  glibc           # GNU C Library
                 ];
 
-                # Define an activation script to configure Rustup
+                # Define an activation script for configuring Rustup
                 home.activation = {
                   configureRustup = ''
                     if [ -x "$HOME/.cargo/bin/rustup" ]; then
@@ -74,38 +82,53 @@
                   '';
                 };
 
-                # Define Zsh aliases using zsh.shellAliases
+                # Define custom Zsh aliases
                 home.shellAliases = {
-                  flakeup = "nix flake lock ${nixConfigDirectory} --update-input $1";
-                  nxb = "nix build ${nixConfigDirectory}/#homeConfiguration.${username}.activationPackage -o ${nixConfigDirectory}/result";
-                  nxa = "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}";
+                  flakeup = "nix flake lock ${nixConfigDirectory} --update-input $1"; # Update flake inputs
+                  nxb = "nix build ${nixConfigDirectory}/#homeConfiguration.${username}.activationPackage -o ${nixConfigDirectory}/result"; # Build Home Manager configuration
+                  nxa = "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}"; # Activate Home Manager configuration
                 };
 
-                # Correctly set environment variables for Go and Rust
+                # Define session variables for Go, Rust, and PATH
                 home.sessionVariables = {
-                  RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
-                  CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
-                  GOPATH = "$HOME/go";             # Set GOPATH environment variable to the correct path
-                  GOBIN = "$HOME/go/bin";             # Set GOPATH environment variable to the correct path
-                  CARGOBIN = "$CARGO_HOME/bin";    # Define CARGOBIN based on CARGO_HOME
-                  # PATH = "$CARGOBIN:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";  # Update PATH
-                  PATH = "${pkgs.nodejs}/bin:$HOME/.npm-global/bin:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";
+                  RUSTUP_HOME = "$HOME/.rustup";  # Directory for Rustup installation
+                  CARGO_HOME = "$HOME/.cargo";  # Directory for Cargo binaries
+                  GOPATH = "$HOME/go";  # Go workspace directory
+                  GOBIN = "$HOME/go/bin";  # Directory for Go binaries
+                  PATH = let
+                    customPaths = [
+                      "/home/zeihanaulia/go/bin" # Path for Go binaries
+                      "$HOME/.cargo/bin"        # Path for Rust Cargo binaries
+                      "$HOME/.nix-profile/bin"  # Path for Nix profile binaries
+                      "${pkgs.nodejs}/bin"      # Path for Node.js binaries
+                    ];
+                    cleanPaths = builtins.concatStringsSep ":" (builtins.filter (path: path != "") customPaths);
+                  in
+                    "${cleanPaths}:$PATH";  # Combine all paths into a single PATH variable
                 };
 
-                # Zsh Configuration
+                # Global configuration for Neovim
+                programs.neovim = {
+                  enable = true;        # Enable Neovim
+                  defaultEditor = true; # Set Neovim as the default editor
+                  viAlias = true;       # Add an alias for `vi`
+                  vimAlias = true;      # Add an alias for `vim`
+                };
+
+                # Configuration for Zsh shell
                 programs.zsh = {
-                  enable = true;  # Enable Zsh as the shell
-                  autosuggestion.enable = true;  # Enable command autosuggestion in Zsh
-                  syntaxHighlighting.enable = true;  # Enable syntax highlighting in Zsh
-                  autocd = true;  # Enable autocd (change directory automatically)
+                  enable = true;  # Enable Zsh shell
+                  autosuggestion.enable = true;  # Enable command autosuggestions
+                  syntaxHighlighting.enable = true;  # Enable syntax highlighting
+                  autocd = true;  # Enable automatic directory switching
                   
                   oh-my-zsh = {
-                    enable = true;  # Enable Oh My Zsh framework
-                    plugins = [ "git" ];  # Use the Git plugin with Oh My Zsh
-                    theme = "robbyrussell";  # Set the theme to robbyrussell
+                    enable = true;  # Enable the Oh My Zsh framework
+                    plugins = [ "git" ];  # Add the Git plugin
+                    theme = "robbyrussell";  # Set the theme to `robbyrussell`
                   };
                   
-                  plugins = [{
+                  plugins = [ {
                     name = "zsh-nix-shell";  # Plugin for integrating Nix with Zsh
                     file = "nix-shell.plugin.zsh";
                     src = pkgs.fetchFromGitHub {
@@ -114,13 +137,14 @@
                       rev = "v0.5.0";
                       sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
                     };
-                  }];
+                  } ];
 
-                initExtra = ''
-                  if [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
-                    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-                  fi
-                '';
+                  # Additional initialization for Zsh
+                  initExtra = ''
+                    if [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+                      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+                    fi
+                  '';
                 };
 
                 # Enable Home Manager programs for the user

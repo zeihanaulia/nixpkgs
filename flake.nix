@@ -54,10 +54,13 @@
                   impl
                   delve
                   mysql-client
-                  nodejs          # Latest Node.js package available in Nixpkgs
+                  nodejs_23          # Latest Node.js package available in Nixpkgs
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager
                   rustup          # Rustup installer from Nixpkgs
+                  gh
+                  jdk17
+                  python311Packages.jupyterlab
                 ];
 
                 # Define an activation script to configure Rustup
@@ -85,7 +88,7 @@
                   GOPATH = "$HOME/go";             # Set GOPATH environment variable to the correct path
                   GOBIN = "$HOME/go/bin";             # Set GOPATH environment variable to the correct path
                   CARGOBIN = "$CARGO_HOME/bin";    # Define CARGOBIN based on CARGO_HOME
-                  PATH = "$CARGOBIN:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";  # Update PATH
+                  PATH = "$CARGOBIN:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";
                 };
 
                 # Zsh Configuration
@@ -109,6 +112,14 @@
                       sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
                     };
                   }];
+                  initExtra = ''
+                    export RUSTUP_HOME="$HOME/.rustup"
+                    export CARGO_HOME="$HOME/.cargo"
+                    export GOPATH="$HOME/go"
+                    export GOBIN="$HOME/go/bin"
+                    export CARGOBIN="$CARGO_HOME/bin"
+                    export PATH="$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH"
+                  '';
                 };
 
                 # Enable Home Manager programs for the user

@@ -54,7 +54,7 @@
                   impl
                   delve
                   mysql-client
-                  nodejs_23          # Latest Node.js package available in Nixpkgs
+                  nodejs_20          # Latest Node.js package available in Nixpkgs
                   pnpm
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager

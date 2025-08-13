@@ -62,6 +62,7 @@
                   gh
                   jdk17
                   python311Packages.jupyterlab
+                  deno
                 ];
 
                 # Define an activation script to configure Rustup

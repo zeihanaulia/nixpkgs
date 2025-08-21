@@ -58,6 +58,7 @@
                   pnpm
                   python3         # Latest Python 3 package available in Nixpkgs
                   python311Packages.pip # Python pip package manager
+                  python311Packages.uv  # uv CLI (fast Python installer/resolver) tied to python311
                   rustup          # Rustup installer from Nixpkgs
                   gh
                   jdk17
@@ -121,6 +122,21 @@
                     export GOBIN="$HOME/go/bin"
                     export CARGOBIN="$CARGO_HOME/bin"
                     export PATH="$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH"
+
+                    # Provide a lightweight fallback for the `uv` command.
+                    # If an external `uv` binary exists, delegate to it. Otherwise
+                    # support `uv venv <dir>` by using the stdlib venv implementation.
+                    uv() {
+                      if whence -p uv >/dev/null 2>&1; then
+                        command uv "$@"
+                      elif [ "$1" = "venv" ]; then
+                        shift
+                        python -m venv "$@"
+                      else
+                        echo "uv: command not found"
+                        return 127
+                      fi
+                    }
                   '';
                 };
 

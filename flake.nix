@@ -64,6 +64,7 @@
                   jdk17
                   python311Packages.jupyterlab
                   deno
+                  poetry
                 ];
 
                 # Define an activation script to configure Rustup

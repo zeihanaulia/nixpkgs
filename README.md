@@ -62,13 +62,23 @@ To build and activate the Home Manager configuration for the user, use the follo
 
 ## Updating Flake Inputs
 
-To update the lock file for specific inputs in your flake, use the `flake lock` command. For example, to update `nixpkgs-unstable`:
+To update the lock file for specific inputs in your flake, use the `flake lock` command. For example, to update `nixpkgs`:
 
 ```sh
-nix flake lock ~/.config/nixpkgs --update-input nixpkgs-unstable
+nix flake lock ~/.config/nixpkgs --update-input nixpkgs
 ```
 
-This command updates the input for `nixpkgs-unstable` within your flake configuration.
+This command updates the input for `nixpkgs` within your flake configuration.
+
+## Checking Package Versions
+
+To check the version of a specific package available in nixpkgs, use the `nix eval` command. For example, to check the version of Node.js 24:
+
+```sh
+nix eval nixpkgs#nodejs_24.version
+```
+
+This will output the version string, such as "24.11.1".
 
 ## Using Shell Aliases
 

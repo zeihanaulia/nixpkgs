@@ -1,153 +1,99 @@
 {
   inputs = {
-    # Define the URL for the Home Manager and Nixpkgs inputs
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nixpkgs.url = "github:nixos/nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, home-manager, nixpkgs }:
+  outputs = { self, nixpkgs, home-manager }:
     let
-      # Define the list of systems for which the outputs should be provided
-      allSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" "aarch64-apple-darwin" ];
+      username = "zeihanaulia";
+      system = "aarch64-darwin";  # Mac M1
+      pkgs = import nixpkgs { inherit system; };
+    in
+    {
+      homeConfigurations = {
+        "${username}" = home-manager.lib.homeManagerConfiguration {
 
-      # Define the username variable for use in Home Manager configurations
-      username = "zeihanaulia";  
+          # FIX PALING PENTING
+          pkgs = pkgs;
 
-      # Define the Nix configuration directory variable, pointing to the user's Nix configuration path
-      nixConfigDirectory = "~/.config/nixpkgs"; 
-      
-      # Function to generate system-specific Nixpkgs for each system listed in allSystems
-      forAllSystems = f: nixpkgs.lib.genAttrs allSystems (system: f {
-        # Import Nixpkgs for the given system architecture
-        pkgs = import nixpkgs { inherit system; };
-      });
-
-    in {
-      # Generate packages for each system configuration using the defined function
-      packages = forAllSystems ({ pkgs }: {
-        # Define the Home Manager configuration for the user 'zeihanaulia'
-        homeConfiguration = {
-          zeihanaulia = home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;  # Inherit the pkgs from the imported Nixpkgs
-
-            modules = [
-              {
-                # Set the state version of Home Manager (aligns with the version of Nixpkgs)
-                home.stateVersion = "24.05";
-
-                # Set the username for the Home Manager configuration
-                home.username = username;
-
-                # Conditionally set the home directory based on the operating system
-                # Use '/Users/${username}' for macOS (Darwin) and '/home/${username}' for Linux
-                home.homeDirectory = if pkgs.stdenv.isDarwin
-                then "/Users/${username}"
-                else "/home/${username}";
-
-                # Define the packages to be installed, including specific versions of Go, Node.js, Rustup, and Python
-                home.packages = with pkgs; [
-                  (pkgs.go_1_23)  # Specify Go version 1.23 explicitly
-                  gopls           # Go language server protocol package
-                  gotests
-                  gomodifytags
-                  impl
-                  delve
-                  mysql-client
-                  nodejs_20          # Latest Node.js package available in Nixpkgs
-                  pnpm
-                  python3         # Latest Python 3 package available in Nixpkgs
-                  python311Packages.pip # Python pip package manager
-                  python311Packages.uv  # uv CLI (fast Python installer/resolver) tied to python311
-                  rustup          # Rustup installer from Nixpkgs
-                  gh
-                  jdk17
-                  python311Packages.jupyterlab
-                  deno
-                  poetry
-                ];
-
-                # Define an activation script to configure Rustup
-                home.activation = {
-                  configureRustup = ''
-                    if [ -x "$HOME/.cargo/bin/rustup" ]; then
-                      export PATH="$HOME/.cargo/bin:$PATH"    
-                      "$HOME/.cargo/bin/rustup" toolchain install stable   
-                      "$HOME/.cargo/bin/rustup" default stable            
-                    fi
-                  '';
-                };
-
-                # Define Zsh aliases using zsh.shellAliases
-                home.shellAliases = {
-                  flakeup = "nix flake lock ${nixConfigDirectory} --update-input $1";
-                  nxb = "nix build ${nixConfigDirectory}/#homeConfiguration.${username}.activationPackage -o ${nixConfigDirectory}/result";
-                  nxa = "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfiguration.${username}";
-                };
-
-                # Correctly set environment variables for Go and Rust
-                home.sessionVariables = {
-                  RUSTUP_HOME = "$HOME/.rustup";   # Directory for Rustup
-                  CARGO_HOME = "$HOME/.cargo";     # Directory for Cargo
-                  GOPATH = "$HOME/go";             # Set GOPATH environment variable to the correct path
-                  GOBIN = "$HOME/go/bin";             # Set GOPATH environment variable to the correct path
-                  CARGOBIN = "$CARGO_HOME/bin";    # Define CARGOBIN based on CARGO_HOME
-                  PATH = "$CARGOBIN:$HOME/go/bin:$HOME/.nix-profile/bin:$PATH";
-                };
-
-                # Zsh Configuration
-                programs.zsh = {
-                  enable = true;  # Enable Zsh as the shell
-                  autosuggestion.enable = true;  # Enable command autosuggestion in Zsh
-                  syntaxHighlighting.enable = true;  # Enable syntax highlighting in Zsh
-                  autocd = true;  # Enable autocd (change directory automatically)
-                  oh-my-zsh = {
-                    enable = true;  # Enable Oh My Zsh framework
-                    plugins = [ "git" ];  # Use the Git plugin with Oh My Zsh
-                    theme = "robbyrussell";  # Set the theme to robbyrussell
-                  };
-                  plugins = [{
-                    name = "zsh-nix-shell";  # Plugin for integrating Nix with Zsh
-                    file = "nix-shell.plugin.zsh";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "chisui";
-                      repo = "zsh-nix-shell";
-                      rev = "v0.5.0";
-                      sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
-                    };
-                  }];
-                  initExtra = ''
-                    export RUSTUP_HOME="$HOME/.rustup"
-                    export CARGO_HOME="$HOME/.cargo"
-                    export GOPATH="$HOME/go"
-                    export GOBIN="$HOME/go/bin"
-                    export CARGOBIN="$CARGO_HOME/bin"
-                    export PATH="$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH"
-
-                    # Provide a lightweight fallback for the `uv` command.
-                    # If an external `uv` binary exists, delegate to it. Otherwise
-                    # support `uv venv <dir>` by using the stdlib venv implementation.
-                    uv() {
-                      if whence -p uv >/dev/null 2>&1; then
-                        command uv "$@"
-                      elif [ "$1" = "venv" ]; then
-                        shift
-                        python -m venv "$@"
-                      else
-                        echo "uv: command not found"
-                        return 127
-                      fi
-                    }
-                  '';
-                };
-
-                # Enable Home Manager programs for the user
-                programs.home-manager.enable = true;
-              }
-            ];
-
+          # FIX PALING PENTING nomor 2:
+          extraSpecialArgs = {
+            inherit pkgs username system;
           };
+
+          modules = [
+            {
+              home.stateVersion = "24.05";
+
+              home.username = username;
+              home.homeDirectory = "/Users/${username}";
+              home.enableNixpkgsReleaseCheck = false;
+
+              home.packages = with pkgs; [
+                go_1_24
+                gopls
+                gotests
+                gomodifytags
+                impl
+                delve
+                mariadb.client
+                nodejs_24
+                pnpm
+                python3
+                python311Packages.pip
+                python311Packages.uv
+                rustup
+                gh
+                jdk17
+                python311Packages.jupyterlab
+                deno
+                poetry
+              ];
+
+              home.shellAliases = {
+                flakeup = "nix flake lock . --update-input $1";
+                nxa = ''home-manager switch --flake .#${username}'';
+              };
+
+              home.sessionVariables = {
+                GOPATH = "$HOME/go";
+                GOBIN = "$HOME/go/bin";
+                RUSTUP_HOME = "$HOME/.rustup";
+                CARGO_HOME = "$HOME/.cargo";
+                CARGOBIN = "$CARGO_HOME/bin";
+                PATH = "$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH";
+              };
+
+              programs.zsh = {
+                enable = true;
+                autosuggestion.enable = true;
+                syntaxHighlighting.enable = true;
+                autocd = true;
+                oh-my-zsh = {
+                  enable = true;
+                  plugins = [ "git" ];
+                  theme = "robbyrussell";
+                };
+                plugins = [{
+                  name = "zsh-nix-shell";
+                  file = "nix-shell.plugin.zsh";
+                  src = pkgs.fetchFromGitHub {
+                    owner = "chisui";
+                    repo = "zsh-nix-shell";
+                    rev = "v0.5.0";
+                    sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
+                  };
+                }];
+              };
+
+              programs.home-manager.enable = true;
+            }
+          ];
         };
-      });
+      };
     };
 }

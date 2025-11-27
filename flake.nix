@@ -65,7 +65,8 @@
                 RUSTUP_HOME = "$HOME/.rustup";
                 CARGO_HOME = "$HOME/.cargo";
                 CARGOBIN = "$CARGO_HOME/bin";
-                PATH = "$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH";
+                NPM_CONFIG_PREFIX = "$HOME/.npm-global";
+                PATH = "$HOME/.npm-global/bin:$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH";
               };
 
               programs.zsh = {

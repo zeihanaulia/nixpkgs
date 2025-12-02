@@ -66,7 +66,7 @@
                 CARGO_HOME = "$HOME/.cargo";
                 CARGOBIN = "$CARGO_HOME/bin";
                 NPM_CONFIG_PREFIX = "$HOME/.npm-global";
-                PATH = "$HOME/.npm-global/bin:$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH";
+                PATH = "$HOME/.local/bin:$HOME/.npm-global/bin:$CARGOBIN:$GOBIN:$HOME/.nix-profile/bin:$PATH";
               };
 
               programs.zsh = {
@@ -74,6 +74,9 @@
                 autosuggestion.enable = true;
                 syntaxHighlighting.enable = true;
                 autocd = true;
+                initContent = ''
+                  export PATH="$HOME/.local/bin:$PATH"
+                '';
                 oh-my-zsh = {
                   enable = true;
                   plugins = [ "git" ];

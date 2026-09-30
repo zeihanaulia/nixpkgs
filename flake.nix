@@ -57,6 +57,7 @@
               home.shellAliases = {
                 flakeup = "nix flake lock . --update-input $1";
                 nxa = ''home-manager switch --flake .#${username}'';
+                oc = "opencode --standalone";
               };
 
               home.sessionVariables = {
@@ -75,6 +76,7 @@
                 syntaxHighlighting.enable = true;
                 autocd = true;
                 initContent = ''
+                  export PATH="$HOME/.opencode/bin:$PATH"
                   export PATH="$HOME/.local/bin:$PATH"
                 '';
                 oh-my-zsh = {
